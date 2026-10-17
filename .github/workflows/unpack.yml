@@ -10,27 +10,48 @@ permissions:
 jobs:
   unpack:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ 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 }}
+          persist-credentials: true
 
       - name: Extract project ZIP
+        shell: bash
         run: |
-          test -f MADXPLAYER_UPGRADED.zip
+          set -euo pipefail
+
+          if [ ! -f MADXPLAYER_UPGRADED.zip ]; then
+            echo "ERROR: MADXPLAYER_UPGRADED.zip not found in repository root."
+            exit 1
+          fi
+
           mkdir -p /tmp/madx-project
           unzip -oq MADXPLAYER_UPGRADED.zip -d /tmp/madx-project
+
           cp -a /tmp/madx-project/. .
           rm -rf /tmp/madx-project
-          rm -f MADXPLAYER_UPGRADED.zip
-          git status --short
+
+          echo "Extracted project files:"
+          ls -la
 
       - name: Commit extracted source
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Extract MADXPLAYER source files"
-            git push
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
           fi
+
+          git commit -m "Extract MADXPLAYER upgraded source"
+          git push origin HEAD:main
           
