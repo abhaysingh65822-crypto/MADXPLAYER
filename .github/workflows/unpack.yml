@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ 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 }}
+          token: ${{ secrets.GH_TOKEN }}
           persist-credentials: true
 
       - name: Extract project ZIP
