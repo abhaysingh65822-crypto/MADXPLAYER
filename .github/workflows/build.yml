@@ -40,7 +40,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           ZIP_FILE="MADXPLAYER_UPGRADED.zip"
 
           if [ ! -f "$ZIP_FILE" ]; then
@@ -76,16 +75,35 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Gradle project: $PROJECT_DIR"
 
+      - name: Generate debug keystore
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEYSTORE="$GITHUB_WORKSPACE/_madx_build/debug.keystore"
+
+          keytool -genkeypair \
+            -v \
+            -keystore "$KEYSTORE" \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+          echo "Debug keystore created: $KEYSTORE"
+
       - name: Build debug APK
         shell: bash
         run: |
           set -euo pipefail
-          cd "$PROJECT_DIR"
 
+          cd "$PROJECT_DIR"
           echo "Building in $(pwd)"
           java -version
           gradle --version
-
           gradle --no-daemon --stacktrace assembleDebug
 
       - name: Find APK
@@ -115,3 +133,4 @@ jobs:
           path: ${{ env.APK_FILE }}
           if-no-files-found: error
           retention-days: 30
+          
