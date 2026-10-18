@@ -115,4 +115,3 @@ jobs:
           path: ${{ env.APK_FILE }}
           if-no-files-found: error
           retention-days: 30
-          2
